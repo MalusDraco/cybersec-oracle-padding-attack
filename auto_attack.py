@@ -61,25 +61,18 @@ def decodeBlock(IV, C1, C2):
 if __name__ == "__main__":
     oracle = PaddingOracle('10.9.0.80', 6000)
 
-    # Get the IV + Ciphertext from the oracle
-    iv_and_ctext = bytearray(oracle.ctext)
-    IV    = iv_and_ctext[00:16]
-    C1    = iv_and_ctext[16:32]  # 1st block of ciphertext
-    C2    = iv_and_ctext[32:48]  # 2nd block of ciphertext
-    print("C1:  " + C1.hex())
-    print("C2:  " + C2.hex())
-
-
     iv_and_ctext = bytearray(oracle.ctext)
     blocklist = [ iv_and_ctext[i:i+16] for i in range(0, len(iv_and_ctext), 16) ]
     num_runs = len(blocklist) - 2
 
     currBlocks = []
     out = ""
+    init_IV = bytearray(16)
     # Add first two blocks
     currBlocks.append(blocklist.pop(0))
     currBlocks.append(blocklist.pop(0))
     out = ""
+    out += decodeBlock(init_IV, currBlocks[0], currBlocks[1])  # Decode first block w/ blank IV
     for i in range(num_runs):
         currBlocks.append(blocklist.pop(0))
         out += decodeBlock(currBlocks[0], currBlocks[1], currBlocks[2])
@@ -88,8 +81,3 @@ if __name__ == "__main__":
     #out += decodeBlock(blocklist[0], blocklist[1], blocklist[2])
     #out += decodeBlock(blocklist[1], blocklist[2], blocklist[3])
     print(out)
-
-
-
-
-
